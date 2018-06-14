@@ -19,23 +19,20 @@ load('trips.RData')
 ########################################
 
 # plot the distribution of trip times across all rides
-ggplot(trips, aes(x = tripduration)) +
+trips %>% filter(tripduration < 60000) %>% 
+  ggplot(aes(x = tripduration/60)) +
   geom_histogram(bins = 50) +
-  scale_x_log10(label = comma, breaks = c(1, 3, 10, 30, 100, 300, 1e3, 3e3, 1e4, 3e4, 1e5)) +
-  scale_y_log10(label = comma)
+  scale_x_log10(label = comma) +
+  scale_y_log10(label = comma) + xlab('Time in Minutes')
 
 # plot the distribution of trip times by rider type
-ggplot(trips, aes(x = tripduration)) +
+trips %>% filter(tripduration < 60000) %>% 
+  ggplot(aes(x = tripduration)) +
   geom_histogram(bins = 50) +
-  facet_wrap(~ usertype, scale = "free") +
-  scale_x_log10(label = comma, breaks = c(1, 3, 10, 30, 100, 300, 1e3, 3e3, 1e4, 3e4, 1e5))
+  facet_wrap(~ usertype, ncol = 1, scale = "free_y") +
+  scale_x_log10(label = comma) + scale_y_log10(label = comma)
   
 # plot the total number of trips over each day
-ggplot(trips, aes(x = as.Date(starttime))) +
-  geom_histogram(bins = 50) + 
-  xlab('Date') 
-
-#also:
 trips_per_day <- trips %>% group_by(ymd) %>% summarize(count = n())
 ggplot(trips_per_day, aes(x = ymd, y = count)) +
   geom_point() +
@@ -46,10 +43,10 @@ ggplot(trips_per_day, aes(x = ymd, y = count)) +
 # plot the total number of trips (on the y axis) by age (on the x axis) and age (indicated with color)
 trips %>%
   mutate(age = year(ymd) - birth_year) %>% 
-  group_by(age) %>%
+  group_by(age,gender) %>%
   summarize(n=n()) %>%
-  ggplot(aes(x = age, y = n, color = age)) +
-  geom_point() + 
+  ggplot(aes(x = age, y = n, color = gender)) +
+  geom_point() +  scale_y_log10(label = comma) +
   ylab('count') 
 
 #also:
@@ -65,14 +62,14 @@ ggplot(trips_per_age, aes(x = age, y = count)) +
 # plot the ratio of male to female trips (on the y axis) by age (on the x axis)
 # hint: use the spread() function to reshape things to make it easier to compute this ratio
 trips_per_age_and_gender <- trips %>%
-  mutate(age = year(ymd) - birth_year) %>%
+  mutate(age = year(ymd) - birth_year) %>% filter(age < 65)
   group_by(age, gender) %>%
   summarize(count = n()) %>%
   filter(gender != "Unknown" & age != "NA") %>%
   spread(gender, count)
 
 ggplot(trips_per_age_and_gender, aes(x = age, y = Male / Female)) +
-  geom_point() +
+  geom_point() + geom_smooth() +
   xlim(c(0, 90)) +
   xlab("Rider Age") +
   ylab("Male to Female Ratio")
@@ -90,7 +87,9 @@ ggplot(weather, aes(x = ymd, y = tmin)) +
 # hint: try using the gather() function for this to reshape things before plotting
 weather %>% gather("temp_type", "temp_val", "tmin", "tmax") %>%
   ggplot(aes(x = ymd, y = temp_val, color = temp_type)) +
-  geom_point()
+  geom_point() +
+  xlab("Date") +
+  ylab("Temperature")
 
 ########################################
 # plot trip and weather data
@@ -133,8 +132,8 @@ trips %>% mutate(hour = hour(starttime)) %>%
   group_by(hour) %>%
   summarize(avg = mean(num_trips), sd = sd(num_trips)) %>%
   gather("stat", "value", avg, sd) %>%
-  ggplot(aes(x = hour, y = value, color = stat)) +
-  geom_point()
+  ggplot(aes(x = hour, y = avg) +
+  geom_line() + geom_ribbon(aes(ymin = avg - sd, ymax = avg + sd), alpha = 0.2))
 
 # repeat this, but now split the results by day of the week (Monday, Tuesday, ...) or weekday vs. weekend days
 # hint: use the wday() function from the lubridate package
@@ -144,6 +143,6 @@ trips %>% mutate(day = wday(starttime, label = TRUE), hour = hour(starttime)) %>
   group_by(hour, day) %>%
   summarize(avg = mean(num_trips), sd = sd(num_trips)) %>%
   gather("stat", "value",  avg, sd) %>%
-  ggplot(aes(x = hour, y = value, color = stat)) +
-  geom_point() +
+  ggplot(aes(x = hour, y = avg) +
+  geom_line() + geom_ribbon(aes(ymin = avg - sd, ymax = avg + sd), alpha = 0.2)) +
   facet_wrap(~ day)

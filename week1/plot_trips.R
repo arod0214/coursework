@@ -5,6 +5,7 @@
 # load some packages that we'll need
 library(tidyverse)
 library(scales)
+library(lubridate)
 
 # be picky about white backgrounds on our plots
 theme_set(theme_bw())
@@ -18,12 +19,30 @@ load('trips.RData')
 ########################################
 
 # plot the distribution of trip times across all rides
+ggplot(trips, aes(x = tripduration)) +
+  geom_histogram(bins = 50) +
+  scale_x_log10(label = comma, breaks = c(1, 3, 10, 30, 100, 300, 1e3, 3e3, 1e4, 3e4, 1e5)) +
+  scale_y_log10(label = comma)
 
 # plot the distribution of trip times by rider type
-
+ggplot(trips, aes(x = tripduration)) +
+  geom_histogram(bins = 50) +
+  facet_wrap(~ usertype, scale = "free") +
+  scale_x_log10(label = comma, breaks = c(1, 3, 10, 30, 100, 300, 1e3, 3e3, 1e4, 3e4, 1e5))
+  
 # plot the total number of trips over each day
+ggplot(trips, aes(x = as.Date(starttime))) +
+  geom_histogram(bins = 50) + 
+  xlab('Date') 
 
 # plot the total number of trips (on the y axis) by age (on the x axis) and age (indicated with color)
+trips %>%
+  mutate(age = year(ymd) - birth_year) %>% 
+  group_by(age) %>%
+  summarize(n=n()) %>%
+  ggplot(aes(x = age, y = n, color = age)) +
+  geom_point() + 
+  ylab('count') 
 
 # plot the ratio of male to female trips (on the y axis) by age (on the x axis)
 # hint: use the spread() function to reshape things to make it easier to compute this ratio

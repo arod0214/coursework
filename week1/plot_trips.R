@@ -19,19 +19,19 @@ load('trips.RData')
 ########################################
 
 # plot the distribution of trip times across all rides
-trips %>% filter(tripduration < 60000) %>%
+trips %>% filter(tripduration < 60000) %>% 
   ggplot(aes(x = tripduration/60)) +
   geom_histogram(bins = 50) +
   scale_x_log10(label = comma) +
   scale_y_log10(label = comma) + xlab('Time in Minutes')
 
 # plot the distribution of trip times by rider type
-trips %>% filter(tripduration < 60000) %>%
+trips %>% filter(tripduration < 60000) %>% 
   ggplot(aes(x = tripduration)) +
   geom_histogram(bins = 50) +
   facet_wrap(~ usertype, ncol = 1, scale = "free_y") +
   scale_x_log10(label = comma) + scale_y_log10(label = comma)
-
+  
 # plot the total number of trips over each day
 trips_per_day <- trips %>% group_by(ymd) %>% summarize(count = n())
 ggplot(trips_per_day, aes(x = ymd, y = count)) +
@@ -40,14 +40,14 @@ ggplot(trips_per_day, aes(x = ymd, y = count)) +
   xlab('Days of the Year') +
   ylab('Number of Trips')
 
-# plot the total number of trips (on the y axis) by age (on the x axis) and gender (indicated with color)
+# plot the total number of trips (on the y axis) by age (on the x axis) and age (indicated with color)
 trips %>%
-  mutate(age = year(ymd) - birth_year) %>%
+  mutate(age = year(ymd) - birth_year) %>% 
   group_by(age,gender) %>%
   summarize(n=n()) %>%
   ggplot(aes(x = age, y = n, color = gender)) +
   geom_point() +  scale_y_log10(label = comma) +
-  ylab('count')
+  ylab('count') 
 
 #also:
 trips_per_age <- trips %>%
@@ -107,7 +107,7 @@ trips %>% group_by(ymd) %>% summarize(count = n()) %>%
 
 # repeat this, splitting results by whether there was substantial precipitation or not
 # you'll need to decide what constitutes "substantial precipitation" and create a new T/F column to indicate this
-weather %>%
+weather %>% 
   mutate(sub_prcp = prcp >= 2 | snow >= 2)
 
 # add a smoothed fit on top of the previous plot, using geom_smooth

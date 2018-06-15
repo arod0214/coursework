@@ -35,6 +35,10 @@ head(ratings) %>% kable()
 
 ```{r dist-ratings}
 # plot the distribution of rating values (slide 21)
+
+ggplot(ratings, aes(x = rating)) +
+    geom_histogram(bins = 10) + 
+  scale_y_continuous(label = comma)
 ```
 
 ## Per-movie stats
@@ -89,4 +93,22 @@ head(ratings) %>% kable()
 # paper, produce one curve for the 100% user satisfaction level and
 # another for 90%---do not, however, bother implementing the null
 # model (shown in the dashed lines).
+
+movie_pop <- group_by(ratings, movie_id) %>% summarise(num_ratings = n()) %>% arrange(desc(num_ratings)) %>% mutate(rank = row_number()) 
+
+movie_ranks <- inner_join(ratings, movie_pop) 
+
+cutoff_100 <- movie_ranks %>% group_by(user_id) %>% summarize(cutoff = max(rank))
+
+cutoff_90 <- movie_ranks %>% group_by(user_id) %>% summarize(cutoff = quantile(rank,0.9))
+
+df_cutoff_100 <- cutoff_100 %>% group_by(cutoff) %>% summarise(num_users = n()) %>% arrange(rank(cutoff)) %>% mutate(frac_users = (cumsum(num_users))/sum(num_users), set_level = "100%") 
+
+df_cutoff_90 <- cutoff_90 %>% group_by(cutoff) %>% summarise(num_users = n()) %>% arrange(rank(cutoff)) %>% mutate(frac_users = (cumsum(num_users))/sum(num_users), set_level = "90%")
+
+df <- bind_rows(df_cutoff_90, df_cutoff_100) 
+  
+
+df %>% ggplot(aes(x=cutoff, y = frac_users, color = set_level))+ geom_line() +
+  xlab('Inventory Size') + ylab('% of Users Satisfied')
 ```

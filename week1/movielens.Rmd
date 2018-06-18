@@ -46,16 +46,29 @@ ggplot(ratings, aes(x = rating)) +
 ```{r aggregate-by-movie}
 # aggregate ratings by movie, computing mean and number of ratings
 # hint: use the n() function for easy counting within a group
+
+#aggregate(ratings$rating, list(movie = ratings$movie_id), mean) %>% 
+ # summarize(num_ratings = n()) %>% View
+
+ratings %>% group_by(movie_id) %>% summarize(avg_rating = mean(rating), num_ratings = n())
 ```
 
 ```{r dist-movie-popularity}
 # plot distribution of movie popularity (= number of ratings the movie received)
 # hint: try scale_x_log10() for a logarithmic x axis
+ratings %>% group_by(movie_id) %>% summarise(num_ratings = n()) %>%
+  ggplot(aes(x = num_ratings)) + geom_histogram() + scale_x_log10(label = comma)
 ```
 
 ```{r dist-mean-ratings-by-movie}
 # plot distribution of mean ratings by movie (slide 23)
 # hint: try geom_histogram and geom_density
+ratings %>% group_by(movie_id) %>% summarize(avg_rating = mean(rating)) %>% ggplot(aes(x = avg_rating)) + geom_histogram() + geom_density(fill = "grey") +
+    xlab('Average rating') 
+
+ratings %>% group_by(movie_id) %>% summarize(avg_rating = mean(rating)) %>% ggplot(aes(x = avg_rating)) + geom_density(fill = "grey") +
+    xlab('Average rating') +
+    ylab('Density')
 ```
 
 ```{r cdf-movie-pop}
@@ -64,6 +77,9 @@ ggplot(ratings, aes(x = rating)) +
 # store the result in a new data frame so you can use it in creating figure 2 from the paper below
 
 # plot the CDF of movie popularity
+ratings %>% group_by(movie_id) %>% summarise(num_ratings = n()) %>% arrange(rank(desc(num_ratings))) %>% mutate(rank = row_number(), frac_movies =  (cumsum(num_ratings))/sum(num_ratings)) %>% 
+  ggplot(aes(x= rank, y = frac_movies))+ geom_line() +
+  xlab('Movie Rank') + ylab('CDF')
 ```
 
 
@@ -71,11 +87,15 @@ ggplot(ratings, aes(x = rating)) +
 
 ```{r aggregate-by-user}
 # aggregate ratings by user, computing mean and number of ratings
+ratings %>% group_by(user_id) %>% summarize(avg_rating = mean(rating), num_ratings = n())
 ```
 
 ```{r dist-user-activity}
 # plot distribution of user activity (= number of ratings the user made)
 # hint: try a log scale here
+ratings %>% group_by(user_id) %>% summarize(num_ratings = n()) %>%
+  ggplot(aes(x = num_ratings)) + geom_histogram() + scale_x_log10(label = comma) +
+  ylab('Number of Users') + xlab('Number of Ratings')
 ```
 
 # Anatomy of the long tail

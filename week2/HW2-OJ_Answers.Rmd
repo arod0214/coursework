@@ -1,0 +1,88 @@
+---
+title: "HW2-OJ"
+author: "Amanda"
+date: "June 19, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##	Visualizing price.
+
+```{r}
+# 	Make a box plot of price.  
+library(tidyverse)
+ggplot(data = oj, aes(x = "Across all Brands", y = price)) + geom_boxplot()
+
+# 	Make a box plot of log price.
+oj %>% mutate(log_price = log(price)) %>%  ggplot(aes(x = "Across all Brands", y = log_price)) + geom_boxplot()
+
+# Make a box plot of price, but separate out each brand.
+ggplot(data = oj, aes(factor(brand), price)) + geom_boxplot(aes(fill = factor(brand)))
+
+# Do the same for log price. 
+oj %>% mutate(log_price = log(price)) %>% ggplot(aes(factor(brand), log_price)) + geom_boxplot(aes(fill = factor(brand)))
+
+# What do these graphs tell you about the variation in price? Why do the log plots look different? Do you find them more/less informative?
+
+```
+##	Visualizing the quantity/price relationship
+```{r}
+# Plot logmove (log quantity) vs. log(price) for each brand.  For this one the appropriate second part of the ggplot command will be: + geom_point(aes(color = factor(var_name)))
+oj %>% mutate(log_price = log(price)) %>% ggplot(aes(logmove,log_price)) + geom_point(aes(color = factor(brand)))
+
+# What do insights can you derive that were not apparent before?
+
+```  
+## Estimating the relationship.
+```{r}
+#	Do a regression of log quantity on log price. How well does the model fit? What is the elasticity, does it make sense?
+oj %>% mutate(log_price = log(price)) %>% lm(formula = logmove ~ log_price)
+
+#	Now add in an intercept term for each brand (add brand to the regression), how do the results change? 
+oj %>% mutate(log_price = log(price)) %>% lm(formula = logmove ~ log_price + brand)
+
+#	Now figure out a way to allow the elasticities to differ by brand. Search "interaction terms" and "dummy variables" if you don't remember this from econometrics. Note the estimate coefficients will "offset" the base estimates. What is the insights we get from this regression? What is the elasticity for each firm? Do the elasticities make sense?
+oj %>% mutate(log_price = log(price)) %>% lm(formula = logmove ~ log_price*brand)
+
+#	Super Star Status: Hold out 20% of your sample randomly.  Estimate the model on the remaining 80%.  Use the predict command to see how well the model fits on the rest of the data (e.g., y_hat <- predict(my_model, newx = test_matrix))
+set.seed(101) 
+
+sample <- sample.int(n = nrow(oj), size = floor(.8*nrow(oj)), replace = F)
+train <- oj[sample, ]
+test  <- oj[-sample, ]
+lm_train <- train %>% mutate(log_price = log(price)) %>% 
+  lm(formula = log_price ~ logmove * brand)
+
+oj %>% oj$y_hat <- predict(lm_train, newx = test) %>% ggplot(aes(x = price, y = y_hat), color = brand) + geom_line()
+
+
+```
+
+##	Impact of "featuring in store".  The "feat" variable is an indicator variable which takes the value of one when a product is featured (e.g., like on an endcap display) 
+```{r}
+#	Which brand is featured the most? Make a ggplot to show this.  Hint: using position = "jitter", within the aes(color = factor(var_name)) of ggplot is one way to do this.  
+oj %>% mutate(log_price = log(price)) %>% ggplot(aes(logmove, log_price)) + geom_point(aes(color = brand), position = "jitter")
+
+#	What is the average price and featured rate of each brand?  Hint: aggregate(df[, x:y], list(df$var_name), mean) where x and y are the column numbers of the two variables you care about.
+aggregate(oj[, 5:6], list(oj$brand), mean) %>% View
+
+# Now do this with the dplyr package: ddply(oj, .(brand), summarize,  feat=mean(feat),price=mean(price)).  That package is really nifty.  You can also break this out by feat and not-featured: ddply(oj, .(brand,feat), summarize,  mean_price=mean(price),sd_price=sd(price), obs=length(price))
+ddply(oj, .(brand), summarize,  feat=mean(feat),price=mean(price)) %>% View
+
+#	How should we incorporate the feature variable into our regression? Start with an additive formulation (e.g. feature impacts sales, but not through price).
+oj %>% mutate(log_price = log(price)) %>% lm(formula = log_price ~ logmove + feat)
+
+#	Now run a model where features can impact sales and price sensitivity.
+oj %>% mutate(log_price = log(price)) %>% lm(formula = log_price ~ logmove * feat)
+
+
+#	Now add what you think are the most relevant sociodemographic controls and produce the regression results from that regression as well.  
+
+```
+
+##	Overall analysis
+Based on your work, which brand has the most elastic demand, which as the least elastic? 
+

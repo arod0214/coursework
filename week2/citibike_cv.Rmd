@@ -5,24 +5,20 @@ date: "June 21, 2018"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 Using the bikeshare data, select which order of polynomial 1:10 best uses temperature to predict total bike ridership.
 ```{r}
-
 #	Create a data frame with one row for each day, the number of trips taken on that day, and the minimum temperature on that day.
 library(tidyverse)
+load("~/coursework/week1/trips.RData")
 trips_per_day <- trips %>% group_by(ymd) %>% summarise(num_trips = n()) 
 trips_by_weather <- left_join(trips_per_day, weather) %>% filter(date > 0)
 
 # Split the data into a randomly selected training and test set, as in the above exercise, with 80% of the data for training the model and 20% for testing.
 set.seed(101) 
 
-sample <- sample.int(n = nrow(trips_by_weather), size = floor(.8*nrow(trips_by_weather)), replace = F)
-train <- trips_by_weather[sample, ]
-test  <- trips_by_weather[-sample, ]
+samp <- sample.int(n = nrow(trips_by_weather), size = floor(.8*nrow(trips_by_weather)), replace = F)
+train <- trips_by_weather[samp, ]
+test  <- trips_by_weather[-samp, ]
 
 # Fit a model using lm to predict the number of trips as a (linear) function of the minimum temperature, and evaluate the fit on the training and testing data sets. Do this first visually by plotting the predicted and actual values as a function of the minimum temperature. Then do this with R^2 and RMSE on both the training and test sets. You'll want to use the predict and cor functions for this.
 lm_train <- train %>%  
@@ -64,9 +60,9 @@ train$RMSEs_poly[i] <- RMSE
 train$r_squared_poly[i] <- r_squared
 } 
 
-df1 <- data.frame(train$r_squared_poly_train, test$r_squared_poly_test) %>% head(5)
-df1 <- df1 %>% mutate(poly_degree = seq.int(nrow(df1)))
-df1 %>% ggplot(aes(x = poly_degree)) + geom_line(aes(y = train.r_squared_poly_train)) + geom_line(aes(y = test.r_squared_poly_test), color = "red")
+df1 <- data.frame(train$r_squared_poly, test$r_squared_poly) %>% head(5)
+df2 <- df1 %>% mutate(poly_degree = seq.int(nrow(df1)))
+df2 %>% ggplot(aes(x = poly_degree)) + geom_line(aes(y = train.r_squared_poly)) + geom_line(aes(y = test.r_squared_poly), color = "red")
 ```
 
 ```{r}

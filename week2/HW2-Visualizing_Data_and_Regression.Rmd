@@ -5,14 +5,12 @@ date: "June 19, 2018"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ##	Visualizing price.
 ```{r}
 # 	Make a box plot of price.  
 library(tidyverse)
+library(readr)
+oj <- read_csv("oj.csv")
 ggplot(data = oj, aes(x = "Across all Brands", y = price)) + geom_boxplot()
 
 # 	Make a box plot of log price.
@@ -55,9 +53,9 @@ test  <- oj[-sample, ]
 lm_train <- train %>%  
   lm(formula = log(price) ~ logmove * brand)
 
-oj %>% oj$y_hat <- predict(lm_train, newx = test) %>% ggplot(aes(x = price, y = y_hat), color = brand) + geom_line()
+oj$y_hat <- predict(lm_train, newdata = test) 
 
-
+oj %>% ggplot(aes(x = price, y = y_hat), color = brand) + geom_line()
 ```
 
 ##	Impact of "featuring in store".  The "feat" variable is an indicator variable which takes the value of one when a product is featured (e.g., like on an endcap display) 

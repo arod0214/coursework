@@ -5,13 +5,11 @@ date: "June 20, 2018"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ## Let's return to the orange juice dataset and investigate how store demographics are related to demand.
 ```{r}
 # Take the "fully interacted" model from HW2 (logmove ~ log(price)*brand*feat) and add in the store demographics as linear features (e.g. + demo1 + demo2+.). 
+library(tidyverse)
+oj <- read_csv("coursework/week2/oj.csv")
 model <- oj %>% lm(formula = logmove ~ log(price)*brand*feat + AGE60 + EDUC + ETHNIC + INCOME + HHLARGE + WORKWOM + HVAL150 + SSTRDIST + SSTRVOL + CPDIST5 + CPWVOL5)
 
 #	What demographics are significantly (t>2) related to demand? 

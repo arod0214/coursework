@@ -9,7 +9,7 @@ output: html_document
 ```{r}
 # Take the "fully interacted" model from HW2 (logmove ~ log(price)*brand*feat) and add in the store demographics as linear features (e.g. + demo1 + demo2+.). 
 library(tidyverse)
-oj <- read_csv("coursework/week2/oj.csv")
+oj <- read_csv("oj.csv")
 model <- oj %>% lm(formula = logmove ~ log(price)*brand*feat + AGE60 + EDUC + ETHNIC + INCOME + HHLARGE + WORKWOM + HVAL150 + SSTRDIST + SSTRVOL + CPDIST5 + CPWVOL5)
 
 #	What demographics are significantly (t>2) related to demand? 
@@ -77,10 +77,8 @@ lagged <- merge(oj, df1, by=c("brand","store","week"))
 colnames(lagged)[18] <- "lagged_price"
 colnames(lagged)[6] <- "price"
 
-lagged = lagged[order(lagged$store,lagged$week)]
-
 #	Now run a regression with this week's log(quantity) on current and last week's price.
-reg_lagged <- lm(formula = logmove ~ log(price)*brand + feat + log(lagged_price))
+reg_lagged <- lagged %>% lm(formula = logmove ~ log(price)*brand + feat + log(lagged_price))
 
 #	What do you notice about the previous week's elasticity?  Does this make sales more or less attractive from a profit maximization perspective?  Why?
 ```
@@ -90,7 +88,7 @@ reg_lagged <- lm(formula = logmove ~ log(price)*brand + feat + log(lagged_price)
 #	Create 5 partitions of the data of equal size.
 set.seed(13)
 folds <- 5
-random_oj <- oj[sample(nrow(oj)),]
+random_oj <- lagged[sample(nrow(lagged)),]
 random_oj$rand_obs <- seq(1,nrow(random_oj))
 random_oj$partition <- random_oj$rand_obs %% folds + 1
 MSEs <- c(1:folds)
@@ -120,11 +118,11 @@ library(glmnet)
 lagged$log.price <- log(lagged$price)
 lagged$log.lagged_price <- log(lagged$lagged_price)
 
-x <- model.matrix(~ log(price) + feat + brand + brand*log(price) + . +log(lagged_price) , data= my_awesome_data) 
+x <- model.matrix(~ log(price) + feat + brand + brand*log(price) + . +log(lagged_price) , data= lagged) 
 y <- as.numeric(as.matrix(lagged$logmove)) 
 set.seed(720) 
 lasso_v1 <- glmnet(x, y, alpha=1)
-plot(laxxo_v1)
+plot(lasso_v1)
 coef(lasso_v1, s=lasso_v1$lambda.min)
 
 #The cross validated version of the model (with some different objects) is this one: 

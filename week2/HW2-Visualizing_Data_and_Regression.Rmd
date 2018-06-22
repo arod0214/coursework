@@ -53,9 +53,9 @@ test  <- oj[-sample, ]
 lm_train <- train %>%  
   lm(formula = log(price) ~ logmove * brand)
 
-oj$y_hat <- predict(lm_train, newdata = test) 
+test$y_hat <- predict(lm_train, newdata = test) 
 
-oj %>% ggplot(aes(x = price, y = y_hat), color = brand) + geom_line()
+test %>% ggplot(aes(x = price, y = y_hat), color = brand) + geom_line()
 ```
 
 ##	Impact of "featuring in store".  The "feat" variable is an indicator variable which takes the value of one when a product is featured (e.g., like on an endcap display) 
@@ -68,7 +68,6 @@ oj %>% ggplot(aes(feat, brand)) + geom_point(aes(color = brand), position = "jit
 aggregate(oj[, 5:6], list(oj$brand), mean) %>% View
 
 # Now do this with the dplyr package: ddply(oj, .(brand), summarize,  feat=mean(feat),price=mean(price)).  That package is really nifty.  You can also break this out by feat and not-featured: ddply(oj, .(brand,feat), summarize,  mean_price=mean(price),sd_price=sd(price), obs=length(price))
-ddply(oj, .(brand), summarize,  feat=mean(feat),price=mean(price)) %>% View
 
 #	How should we incorporate the feature variable into our regression? Start with an additive formulation (e.g. feature impacts sales, but not through price).
 oj %>% lm(formula = log(price) ~ logmove + feat) %>% summary()

@@ -1,0 +1,51 @@
+---
+title: "Predicting Ridership in 2015"
+author: "Amanda Rodriguez"
+date: "June 25, 2018"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(readr)
+load("~/coursework/week2/trips_2015.RData")
+load("~/coursework/week1/trips.RData")
+
+trips_per_day <- trips %>% group_by(ymd) %>% summarize(num_trips = n()) 
+trips_by_weather <- left_join(trips_per_day, weather) %>% filter(date > 0) %>% mutate(avg_temp = ((tmin+tmax)/2))
+
+trips_per_day_2015 <- trips_2015 %>% group_by(ymd) %>% summarize(num_trips = n()) 
+trips_by_weather_2015 <- left_join(trips_per_day_2015, weather_2015) %>% subset(ymd < "2016-01-01") %>% mutate(avg_temp = ((tmin+tmax)/2))
+# trips_by_weather <- left_join(trips_by_weather, holidays) %>% replace_na(list('Bank Holiday' = "FALSE"))
+
+
+set.seed(101) 
+
+train <- trips_by_weather
+test  <- trips_by_weather_2015
+
+```
+
+```{r}
+reg <- train %>% lm(formula = num_trips~tmin * tmax * prcp * snwd + snow)
+summary(reg)
+library(modelr)
+rmse(reg,test)
+rmse(reg,train)
+
+test$y_hat <- predict(reg, newdata = test)
+cor(test$num_trips,test$y_hat)^2
+
+train$y_hat <- predict(reg, newdata = train)
+cor(train$num_trips,train$y_hat)^2
+```
+
+```{r}
+test %>% ggplot(aes(x = ymd,y= num_trips)) + geom_line(aes(y=y_hat)) +geom_point()
+```
+
+```{r}
+
+test %>% ggplot(aes(x = y_hat,y= num_trips)) +
+  geom_line(aes(y = y_hat), color = "red")+geom_point()
+```

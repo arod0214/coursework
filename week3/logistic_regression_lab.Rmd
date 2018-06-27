@@ -1,0 +1,83 @@
+---
+title: "Logistic Regression and ROC Curves Lab"
+author: "Amanda Rodriguez"
+date: "June 26, 2018"
+output: html_document
+---
+
+```{r}
+# Let's load the Titanic training data. What are the odds of surviving the shipwreck?
+library(tidyverse)
+library(readr)
+library(scales)
+library(ElemStatLearn)
+library(e1071)
+library(ROCR)
+titanic_train <- read_csv("~/coursework/week3/titanic_train.csv")
+summary(titanic_train)
+titanic_train %>% summarise(prob_survival = mean(Survived))
+
+#model <- glm(Survived ~  ., data = titanic_train, family = "binomial" )
+#summary(model)
+#predict(model, titanic_train, type = "response")
+# to get odds(log odds): log(p/(1-p))
+```
+
+```{r}
+# Using the logit model, estimate how much lower are the odds of survival for men relative to women?
+logit1 <- glm(Survived ~ Sex, data = titanic_train, family = "binomial")
+summary(logit1)
+# titanic_train %>% group_by(Sex) %>% summarise(prob_survival = mean(Survived))
+titanic_train %>% distinct(Sex) %>% mutate(pred = predict(logit1, newdata = .,type = "response"))
+```
+
+```{r}
+# Controlling for gender, does age have a statistically significant effect on the odds of survival? If so, what is the magnitude of that effect?
+
+logit1 <- glm(Survived ~ Sex * Age , data = titanic_train, family = "binomial")
+summary(logit1)
+titanic_train %>% mutate(pred = predict(logit1, titanic_train, type = "response")) %>% View
+# For men yes (male children will be saved over male adults). For women no(women and children were prioritized when it came to evacuating).
+```
+
+```{r}
+# Controlling for gender, does passenger class have a statistically significant effect on the odds of survival? If so, what is the magnitude of that effect?
+logit1 <- glm(Survived ~ Sex * as.factor(Pclass) , data = titanic_train, family = "binomial")
+summary(logit1)
+titanic_train %>% mutate(pred = predict(logit1, titanic_train, type = "response")) %>% View
+# titanic_train %>% group_by(Pclass, Sex) %>% summarise(total = n())
+
+# Yes for both male and female(upper class women were probably prioritized to lower class women, however there were more lower class women than upper class women; upper class men probably used their class to ensure safety over other men)
+```
+
+```{r}
+# Controlling for gender, estimate the effect of being in the second class relative to first class, and the effect of being in the third relative to first.
+
+logit1 <- glm(Survived ~ Sex * Pclass, data = titanic_train, family = "binomial")
+summary(logit1)
+titanic_train %>% mutate(pred = predict(logit1, titanic_train, type = "response")) %>% View
+# In general, women of lower classes are less likely to be saved over women of the first class. However, men of the third class are more likely to be saved than men of the first class.
+```
+
+```{r}
+# Add fare to the regression you estimated above. Is fare a significant determinant of survival controlling for gender and passenger class? Do you think that if we regressed survival on just gender and fare, fare would be significant? Explain.
+logit1 <- glm(Survived ~ Sex * as.factor(Pclass) + Fare, data = titanic_train, family = "binomial")
+logit1 <- glm(Survived ~ Sex +Fare, data = titanic_train, family = "binomial")
+summary(logit1)
+# No, there are many outliers in the fare column and no consistencies by class or gender. Once you know class, fare does not provide additional information.
+```
+
+```{r}
+# As we know from the movie, Jack traveled in the third class and paid 5 pounds (I know that Jack actually won the ticket in poker, but Swen, from whom Jack won the ticket, paid .). Rose traveled in the first class and paid 500 for her ticket (I know that her fiancee, Cal Hockley - Pittsburgh steel tycoon, actually bought the ticket, but .). What is the probability that Jack will survive? What is the probability that Rose will survive?
+test <- data.frame("Name" = c("Rose","Jack"), "Pclass" = factor(c(1,3)), "Sex" = c("female","male"), "Fare" = c(500,5))
+logit1 <- glm(Survived ~ Sex * as.factor(Pclass) +Fare, data = titanic_train, family = "binomial")
+predict(logit1, test, type = "response")
+```
+
+
+```{r}
+# Create your own logistic model and make predictions for passengers in the Titanic test data set. Keep in mind that you must make predictions for all passengers in the test data (even those with missing values). Use your own probability cut off for predicting survival (0.5 is a natural start). Did you do better with logistic regression than with decision trees? Which algorithm do you like better?
+logit1 <- glm(Survived ~ Sex *Age *Parch, data = titanic_train, family = "binomial")
+summary(logit1)
+titanic_train %>% mutate(pred = predict(logit1, titanic_train, type = "response")) %>% View
+```

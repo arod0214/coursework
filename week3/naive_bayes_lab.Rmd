@@ -1,0 +1,57 @@
+---
+title: "Naive Bayes Lab"
+author: "Amanda Rodriguez"
+date: "June 25, 2018"
+output: html_document
+---
+
+```{r}
+# Suppose you have a database on four customers. You know their income and whether or not they bought your product. Create a data frame with this data.
+customers <- data.frame("buy" = c("yes","no","no","yes"), "income" = c("high","high","medium","low"))
+```
+
+
+```{r}
+# Using Bayes rule calculate the probability that a customer will buy your product given that he or she has high income(by hand) .5
+# Estimate naive Bayes model using your data above. What is the prior probability of someone buying your product? .5
+# What is the probability that a customer has a high income given that he or she bought your product? .5
+library(e1071)
+classifier <- naiveBayes(buy ~ income,customers)
+classifier
+```
+
+
+
+```{r}
+
+# Using the model you estimated above predict the probability of buying given that a customer has high income. Is your result the same as the one you calculated by hand in question 1?
+predict(classifier, data.frame(income = factor("high") ,type = "raw"))
+filter(customers$income == "high")
+
+```
+
+```{r}
+# Suppose you have a database on four customers. You know their gender, income and whether or not they bought your product. Create a data frame with this data.
+
+customers <- customers %>% mutate(gender = c("male", "female", "female", "male"))
+```
+
+```{r}
+# Using Bayes rule calculate the probability that a customer will buy your product given that he has high income and male(by hand)? 1
+
+```
+
+```{r}
+# Estimate naive Bayes model using your data above. What is the prior probability of someone buying your product? 
+# What is the probability that a customer has a high income given that he or she bought your product? 0.5
+# What is the probability that a customer is male given that he bought your product? 1.0
+classifier <- naiveBayes(buy ~ income + gender,customers)
+classifier
+
+```
+
+```{r}
+# Using the model you estimated above, predict the probability of buying given that a customer has a high income and is male. Is your result the same as the one you calculated by hand in question 1?
+predict(classifier, customers, type = "raw")
+```
+

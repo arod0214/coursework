@@ -6,14 +6,14 @@ output: html_document
 ---
 
 Regression Discontinuity on Incumbency E???ect (Lee, 2007)
-(a) Download the dataset (Lee2007 RDReplication.csv) from the coursework repo. There are many more columns here than you need. DWinNxt (whether or not a dem wins the next election) is the outcome variable we want to model. DemWin (whether or not dems win the current election) lets us know if democrats have the incumbency and it is our treatment of interest. Di???DPct tells us how much Dems won/lost by in the previous election, this is our running variable that gives us a discontinuity. ForgnPct, GovWkPct, BlackPct, UrbanPct, DWinPrv, YearElec, and CDNum are potential control variables about each congressional district that can help us predict winners. 
+(a) Download the dataset (Lee2007 RDReplication.csv) from the coursework repo. There are many more columns here than you need. DWinNxt (whether or not a dem wins the next election) is the outcome variable we want to model. DemWin (whether or not dems win the current election) lets us know if democrats have the incumbency and it is our treatment of interest. DiffDPct tells us how much Dems won/lost by in the previous election, this is our running variable that gives us a discontinuity. ForgnPct, GovWkPct, BlackPct, UrbanPct, DWinPrv, YearElec, and CDNum are potential control variables about each congressional district that can help us predict winners. 
 
 ```{r}
 # (b) Run a simple regression to try and predict DWinNxt with DemWin. Observe the coe???cient on DemWin. Do you think it gives an unbiased estiamte of the incumbency e???ect. Why or why not? 
 
 library(readr)
 library(tidyverse)
-incumbency <- read_csv("Lee(2007)_RDReplication.csv")
+incumbency <- read.csv("../week3/Lee(2007)_RDReplication.csv")
 incumbency %>% 
   select(DWinNxt, DemWin, DifDPct, ForgnPct, GovWkPct, BlackPct, UrbanPct, DWinPrv, YearElec, CDNumAtL)
 

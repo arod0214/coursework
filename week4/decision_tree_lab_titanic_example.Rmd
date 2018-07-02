@@ -8,7 +8,7 @@ output: html_document
 ```{r}
 library(readr)
 library(tidyverse)
-titanic_train <- read_csv("coursework/week3/titanic_train.csv")
+titanic_train <- read.csv("../week3/titanic_train.csv") 
 
 # What percentage of passengers in our data set survived?
 titanic_train %>% summarise(pass_survived = mean(Survived))
@@ -17,13 +17,13 @@ titanic_train %>% summarise(pass_survived = mean(Survived))
 ```{r}
 # Which variables do you think may be good predictors of the survival on the Titanic? Document your exploration. (Hint: You may want to turn the Survived variable into a factor using the factor() function.)
 # age, gender, Pclass
+titanic_train %>% glm(formula = Survived ~ Sex * Age + as.factor(Pclass), family = "binomial")
  
 ```
 
 ```{r}
 # Estimate a decision tree predicting survival using age and sex as predictors. Describe your results.
 tree(as.factor(Survived) ~ Age + Sex,titanic_train) %>% summary()
-
 ```
 
 ```{r}
@@ -43,6 +43,6 @@ text(tree(as.factor(Survived) ~ Age + Sex + as.factor(Pclass)+ SibSp + Parch,tit
 
 ```{r}
 # Download test data. This is the test data from Kaggle, we actually don't know the true fate of the passengers in this data set. Use this data to make predictions for these passengers.
-test <- read_csv("coursework/week4/test.csv")
+test <- read.csv("../week4/test.csv")
 test$Survived_pred <- predict(tree_model,test,type="class")
 ```

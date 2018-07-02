@@ -24,7 +24,7 @@ IST Question 12.1:
 ```{r}
 library(tidyverse)
 library(readr)
-magnets <- read_csv("~/coursework/week3/magnets.csv")
+magnets <- read.csv("../week3/magnets.csv")
 placebo <- magnets$change[30:50]
 
 # 3. Carry out the test and report your conclusion. (Use a significance level of 5%.)

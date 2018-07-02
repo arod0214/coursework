@@ -24,7 +24,7 @@ Note:
 # (b) Compute the 'diffs'. Check to see if each outcome metric changed in a statistically significant way between the two interviews. Do this analysis separately for PA and NJ. 
 library(readr)
 library(tidyverse)
-NJ_PA <- read_csv("coursework/week3/Card & Krueger (1994) - dataset.csv")
+NJ_PA <- read.csv("../week3/Card & Krueger (1994) - dataset.csv")
 NJ <- NJ_PA %>% filter(STATE == 1) 
 PA <- NJ_PA %>% filter(STATE == 0) 
 

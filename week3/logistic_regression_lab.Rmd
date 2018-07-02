@@ -13,7 +13,7 @@ library(scales)
 library(ElemStatLearn)
 library(e1071)
 library(ROCR)
-titanic_train <- read_csv("~/coursework/week3/titanic_train.csv")
+titanic_train <- read.csv("../week3/titanic_train.csv")
 summary(titanic_train)
 titanic_train %>% summarise(prob_survival = mean(Survived))
 

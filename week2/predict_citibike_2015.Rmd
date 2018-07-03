@@ -8,8 +8,8 @@ output: html_document
 ```{r}
 library(tidyverse)
 library(readr)
-load("~/coursework/week2/trips_2015.RData")
-load("~/coursework/week1/trips.RData")
+load("../week2/trips_2015.RData")
+load("../week1/trips.RData")
 
 trips_per_day <- trips %>% group_by(ymd) %>% summarize(num_trips = n()) 
 trips_by_weather <- left_join(trips_per_day, weather) %>% filter(date > 0) %>% mutate(avg_temp = ((tmin+tmax)/2))

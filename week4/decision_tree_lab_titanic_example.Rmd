@@ -8,6 +8,7 @@ output: html_document
 ```{r}
 library(readr)
 library(tidyverse)
+library(tree)
 titanic_train <- read.csv("../week3/titanic_train.csv") 
 
 # What percentage of passengers in our data set survived?

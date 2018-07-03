@@ -1,0 +1,62 @@
+---
+title: "Predicting Daily Citibike Trips"
+author: "Amanda Rodriguez"
+date: "June 22, 2018"
+output: html_document
+---
+
+You can use any features you like that are available prior to the day in question, ranging from the weather, to the time of year and day of week, to activity in previous days or weeks, but don't cheat and use features from the future (e.g., the next day's trips).
+```{r}
+
+# As usual, split your data into training and testing subsets and evaluate performance on each.
+library(tidyverse)
+library(readr)
+holidays <- read.csv("../week2/US Bank Holidays 2012-2020.csv")
+load("../week1/trips.RData")
+holidays <- holidays %>% mutate(ymd = as.Date(Date, "%m/%d/%Y")) %>% select(ymd, Bank.Holiday)
+trips_per_day <- trips %>% group_by(ymd) %>% summarize(num_trips = n()) 
+trips_by_weather <- left_join(trips_per_day, weather) %>% filter(date > 0) %>% mutate(avg_temp = ((tmin+tmax)/2))
+trips_by_weather <- left_join(trips_by_weather, holidays) %>% replace_na(list(Bank.Holiday = "FALSE"))
+
+set.seed(101) 
+
+samp <- sample.int(n = nrow(trips_by_weather), size = floor(.8*nrow(trips_by_weather)), replace = F)
+train <- trips_by_weather[samp, ]
+test  <- trips_by_weather[-samp, ]
+```
+
+```{r}
+# Quantify your performance in two ways: R^2 (or the square of the correlation coefficient), as we've been doing, and with root mean-squared error.
+reg <- train %>% lm(formula = num_trips~tmin * tmax * prcp * snwd + snow + Bank.Holiday)
+summary(reg)
+library(modelr)
+rmse(reg,test)
+rmse(reg,train)
+
+test$y_hat <- predict(reg, newdata = test)
+cor(test$num_trips,test$y_hat)^2
+
+train$y_hat <- predict(reg, newdata = train)
+cor(train$num_trips,train$y_hat)^2
+```
+```{r}
+# Report the model with the best performance on the test data. Watch out for overfitting.
+
+
+# Plot your final best fit model in two different ways. First with the date on the x-axis and the number of trips on the y-axis, showing the actual values as points and predicted values as a line. Second as a plot where the x-axis is the predicted value and the y-axis is the actual value, with each point representing one day.
+test %>% ggplot(aes(x = ymd,y= num_trips)) + geom_line(aes(y=y_hat)) +geom_point()
+
+# is snow and snwd correlated?
+trips_by_weather %>% ggplot(aes(x = snwd + 1,y= snow + 1)) +geom_point(position = "jitter") +scale_x_log10() + scale_y_log10()
+# to filter how much snow or snwd you want to see meaured in your model
+# I(snwd > 2)
+
+# Inspect the model when you're done to figure out what the highly predictive features are, and see if you can prune away any negligble features that don't matter much.
+
+```
+
+```{r}
+test %>% ggplot(aes(x = y_hat,y= num_trips, color = Bank.Holiday)) +
+  geom_line(aes(y = y_hat, color = "black"))+geom_point()
+
+```

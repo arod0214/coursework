@@ -11,20 +11,24 @@
 
 import requests
 import json
-import sys
+# import sys
 
 ARTICLE_SEARCH_URL = 'https://api.nytimes.com/svc/search/v2/articlesearch.json'
 
-if __name__=='__main__':
-   if len(sys.argv) != 2:
-      sys.stderr.write('usage: %s <api_key>\n' % sys.argv[0])
-      sys.exit(1)
+# if __name__=='__main__':
+#    if len(sys.argv) != 2:
+#       sys.stderr.write('usage: %s <api_key>\n' % sys.argv[0])
+#       sys.exit(1)
 
-   api_key = sys.argv[1]
+   api_key = 887296b50c8a42d7ae626011175aae02
+   name = ['business', 'world']
 
-   params = {'api-key': api_key}
+for i in name:
+   params = {'api-key': api_key, 'fq':"section_name:"+i, 'sort':"newest"}
    r = requests.get(ARTICLE_SEARCH_URL, params)
    data = json.loads(r.content)
 
-   for doc in data['response']['docs']:
-        print(doc['web_url'])
+#    for doc in data['response']['docs']:
+#         print(doc['web_url'])
+        
+ 

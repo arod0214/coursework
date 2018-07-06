@@ -5,7 +5,7 @@ date: "June 29, 2018"
 output: html_document
 ---
 
-Regression Discontinuity on Incumbency E???ect (Lee, 2007)
+Regression Discontinuity on Incumbency Effect (Lee, 2007)
 (a) Download the dataset (Lee2007 RDReplication.csv) from the coursework repo. There are many more columns here than you need. DWinNxt (whether or not a dem wins the next election) is the outcome variable we want to model. DemWin (whether or not dems win the current election) lets us know if democrats have the incumbency and it is our treatment of interest. DiffDPct tells us how much Dems won/lost by in the previous election, this is our running variable that gives us a discontinuity. ForgnPct, GovWkPct, BlackPct, UrbanPct, DWinPrv, YearElec, and CDNum are potential control variables about each congressional district that can help us predict winners. 
 
 ```{r}

@@ -12,9 +12,7 @@ library(broom)
 # read in the business and world articles from files
 # combine them both into one data frame called articles
 library(readr)
-business <- read.csv("../week4/nyt_business.csv")
-world <- read.csv("../week4/nyt_world.csv")
-articles <- rbind(business, world)
+articles <- read.csv("../week4/nyt_busi_world_articles.csv") 
 
 # create a corpus from the article snippets
 # using the Corpus and VectorSource functions

@@ -97,12 +97,12 @@ proj4string(trips_spdf) <- proj4string(nyc_neighborhoods)
 matches2 <- over(trips_spdf, nyc_neighborhoods)
 trips_neighborhood <- cbind(trips_by_hour, matches2)
 
-trips_neighborhood <- trips_neighborhood %>% group_by(start_station_name, longitude, latitude, hour, neighborhood, boroughCode,borough,X.id) %>% summarise(num_trips = n()) %>% filter(hour == "09" | hour == "13" | hour == "17" | hour == "22") 
+trips_neighborhood <- trips_neighborhood %>% group_by(start_station_name, longitude, latitude, hour, neighborhood, boroughCode,borough,X.id) %>% summarise(num_trips = n()) %>% filter(hour == "09" | hour == "13" | hour == "17" | hour == "22") %>% group_by(hour) %>% mutate(percentage = num_trips/sum(num_trips)) # within hour rather than by hour
 ```
 ```{r}
 # Make a ggmap plot showing the number of trips that leave from each neighborhood at 9am, 1pm, 5pm, and 10pm, faceted by hour, where each facet contains a map where the fill color encodes the number of departing trips in each neighborhood
 ggmap(nyc_map) + 
    geom_polygon(data=trips_neighborhood, 
-                aes(x=longitude, y=latitude, fill=num_trips), alpha=0.75) + facet_wrap(~hour)
+                aes(x=longitude, y=latitude, fill=percentage), alpha=0.75) + facet_wrap(~hour, nrow = 1)
 ```
 

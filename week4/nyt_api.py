@@ -20,7 +20,7 @@ ARTICLE_SEARCH_URL = 'https://api.nytimes.com/svc/search/v2/articlesearch.json'
 #       sys.stderr.write('usage: %s <api_key>\n' % sys.argv[0])
 #       sys.exit(1)
 
-   api_key = 887296b50c8a42d7ae626011175aae02
+   api_key = <api_key>
    name = ['business', 'world']
 
 for i in name:
